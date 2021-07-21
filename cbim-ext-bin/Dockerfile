@@ -11,4 +11,27 @@ RUN yum install --downloadonly redis-3.2.12-2.el7.x86_64 --downloaddir=/extra/re
 
 RUN yum install --downloadonly ruby-2.0.0.648-36.el7 rubygems-2.0.14.1-36.el7 --downloaddir=/extra/ruby
 
+ENV NGINX_VERSION=1.18.0
+
+RUN yum install -y \
+    gcc \
+    make \
+    openssl \
+    openssl-devel \
+    pcre \
+    pcre-devel \
+    zlib \
+    zlib-devel \
+    && curl -o nginx.tar.gz -SL http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
+    && tar -xzf nginx.tar.gz -C /tmp/ \
+    && cd /tmp/nginx-* \
+    && ./configure --with-stream \
+    && make && make install
+
+FROM alpine:3.12
+
+RUN mkdir -p /extra
+COPY --from=rpm_centos7 /extra /extra
+COPY --from=rpm_centos7 /usr/local/nginx/sbin/nginx /extra/nginx/
+
 CMD [ "sleep", "360000000" ]    
