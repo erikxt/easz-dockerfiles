@@ -11,27 +11,41 @@ RUN yum install --downloadonly redis-3.2.12-2.el7.x86_64 --downloaddir=/extra/re
 
 RUN yum install --downloadonly ruby-2.0.0.648-36.el7 rubygems-2.0.14.1-36.el7 --downloaddir=/extra/ruby
 
-ENV NGINX_VERSION=1.18.0
+# ENV NGINX_VERSION=1.18.0
 
-RUN yum install -y \
-    gcc \
-    make \
-    openssl \
-    openssl-devel \
-    pcre \
-    pcre-devel \
-    zlib \
-    zlib-devel \
-    && curl -o nginx.tar.gz -SL http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
-    && tar -xzf nginx.tar.gz -C /tmp/ \
-    && cd /tmp/nginx-* \
-    && ./configure --with-stream \
-    && make && make install
+# RUN yum install -y \
+#     gcc \
+#     make \
+#     openssl \
+#     openssl-devel \
+#     pcre \
+#     pcre-devel \
+#     zlib \
+#     zlib-devel \
+#     && curl -o nginx.tar.gz -SL http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
+#     && tar -xzf nginx.tar.gz -C /tmp/ \
+#     && cd /tmp/nginx-* \
+#     && ./configure --with-stream \
+#     && make && make install
+
+RUN yum install --downloadonly nginx-1.20.1-2.el7.x86_64 nginx-mod-stream-1.20.1-2.el7.x86_64 --downloaddir=/extra/nginx
+
+RUN yum install --downloadonly java-1.8.0-openjdk-devel-1.8.0.292.b10-1.el7_9.x86_64 --downloaddir=/extra/openjdk8
+
+RUN mkdir -p /extra/nacos && curl -L https://hub.fastgit.org/alibaba/nacos/releases/download/2.0.1/nacos-server-2.0.1.tar.gz -o /extra/nacos/nacos-server.tar.gz
+
+RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+
+RUN yum install --enablerepo=remi --downloadonly redis-6.2.5 --downloaddir=/extra/redis-6.x
+
+COPY mongodb-org-4.4.repo /etc/yum.repos.d/mongodb-org-4.4.repo
+
+RUN yum install --downloadonly mongodb-org-4.4.8 mongodb-org-server-4.4.8 mongodb-org-shell-4.4.8 mongodb-org-mongos-4.4.8 mongodb-org-tools-4.4.8 --downloaddir=/extra/mongo
 
 FROM alpine:3.12
 
 RUN mkdir -p /extra
 COPY --from=rpm_centos7 /extra /extra
-COPY --from=rpm_centos7 /usr/local/nginx/sbin/nginx /extra/nginx/
+# COPY --from=rpm_centos7 /usr/local/nginx/sbin/nginx /extra/nginx/
 
 CMD [ "sleep", "360000000" ]    
